@@ -23,6 +23,10 @@ type CreateUserRequest struct {
 	Name     string `json:"name" binding:"required"`
 }
 
+type LoginResponse struct {
+	Token string `json:"token"`
+}
+
 func Login(c *gin.Context) {
 	appG := app.Gin{C: c}
 	var input AuthRequest
@@ -41,7 +45,7 @@ func Login(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, "Internal server error")
 		return
 	}
-	appG.Response(http.StatusAccepted, token)
+	appG.Response(http.StatusOK, LoginResponse{Token: token})
 
 }
 
