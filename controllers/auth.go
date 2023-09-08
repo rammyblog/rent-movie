@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rammyblog/rent-movie/database"
+	"github.com/rammyblog/rent-movie/middleware/jwt"
 	"github.com/rammyblog/rent-movie/models"
 	"github.com/rammyblog/rent-movie/package/app"
 	"github.com/rammyblog/rent-movie/types"
@@ -30,7 +30,19 @@ func Login(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, err.Error())
 		return
 	}
-	fmt.Println(input)
+	var user models.User
+
+	if err := database.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
+		appG.Response(http.StatusBadRequest, "Record not found!")
+		return
+	}
+	token, err := jwt.CreateJwt(&user)
+	if err != nil {
+		appG.Response(http.StatusBadRequest, "Internal server error")
+		return
+	}
+	appG.Response(http.StatusAccepted, token)
+
 }
 
 func RegisterUser(c *gin.Context) {
