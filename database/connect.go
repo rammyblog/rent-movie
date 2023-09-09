@@ -13,7 +13,7 @@ import (
 
 var DB *gorm.DB
 
-func Init() (*gorm.DB, error) {
+func Init(seed *bool) (*gorm.DB, error) {
 
 	user, exist := os.LookupEnv("DB_USER")
 
@@ -65,7 +65,9 @@ func Init() (*gorm.DB, error) {
 
 	DB = db
 	MigrateTables(db)
-	seedMovies(db)
+	if *seed {
+		seedMovies(db)
+	}
 	return db, nil
 
 }

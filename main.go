@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -16,7 +17,8 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	// Connect to db
-	db, err := database.Init()
+	seed := flag.Bool("seed", false, "seed the db")
+	db, err := database.Init(seed)
 	if err != nil {
 		log.Fatal("Could not connect to db")
 		panic(err)
