@@ -40,6 +40,14 @@ func Login(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, "Record not found!")
 		return
 	}
+	// compare password
+	validPassword := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)) == nil
+
+	if !validPassword {
+		appG.Response(http.StatusBadRequest, "Email or password incorrect")
+		return
+	}
+	
 	token, err := jwt.CreateJwt(&user)
 	if err != nil {
 		appG.Response(http.StatusBadRequest, "Internal server error")
