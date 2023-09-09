@@ -109,6 +109,7 @@ func RentMovie(c *gin.Context) {
 
 	var user models.User
 	var movie models.Movie
+	var rent models.Rent
 
 	movieId, parsingError := helpers.ConvertStringToInt(&c.Params, "id")
 
@@ -136,6 +137,13 @@ func RentMovie(c *gin.Context) {
 		return
 	}
 
+	if result := database.DB.First(&rent, "movie_id = ? AND user_id = ?", movieId, userId); result.Error == nil {
+		if rent.ID != 0 {
+			appG.Response(http.StatusBadRequest, "Opps... You have borrowed this movie earlier!")
+			return
+		}
+	}
+
 	if input.DateBorrowed.After(input.DueDate) {
 		appG.Response(http.StatusBadRequest, "Borrowed date is after Due date")
 		return
@@ -161,7 +169,39 @@ func RentMovie(c *gin.Context) {
 
 }
 
+func ReturnMovie(c *gin.Context) {
+	appG := app.Gin{C: c}
 
-func ReturnMovie(c *gin.Context){
-	
+	var rent models.Rent
+
+	movieId, parsingError := helpers.ConvertStringToInt(&c.Params, "id")
+
+	if parsingError != nil {
+		log.Fatal(parsingError)
+		appG.Response(http.StatusBadRequest, "Error occurred")
+		return
+	}
+
+	userId, userTokenErr := jwt.GetUserIdFromToken(c)
+
+	if userTokenErr != nil {
+		log.Fatal(userTokenErr)
+		appG.Response(http.StatusBadRequest, "Error occurred")
+		return
+	}
+
+	if result := database.DB.First(&rent, "movie_id = ? AND user_id = ?", movieId, userId); result.Error != nil {
+		log.Fatal(result.Error)
+		appG.Response(http.StatusBadRequest, "An Error occurred while returning a movie")
+		return
+	}
+	if rent.Returned {
+		appG.Response(http.StatusOK, "Already returned")
+		return
+
+	}
+
+	database.DB.Model(&rent).Updates(models.Rent{Returned: true, ReturnedAt: time.Now()})
+	appG.Response(http.StatusOK, rent)
+
 }
