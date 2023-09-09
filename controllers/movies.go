@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rammyblog/rent-movie/database"
 	"github.com/rammyblog/rent-movie/helpers"
+	"github.com/rammyblog/rent-movie/middleware/jwt"
 	"github.com/rammyblog/rent-movie/models"
 	"github.com/rammyblog/rent-movie/package/app"
 )
@@ -21,7 +22,11 @@ type MovieCreateRequest struct {
 	Available   bool      `json:"available" binding:"required"`
 	Image       string    `json:"image" binding:"required"`
 	Genre       []int     `json:"genre" binding:"required"`
-	// Genre       []models.Genre
+}
+
+type MovieRentRequest struct {
+	DueDate      time.Time `json:"dueDate" binding:"required"`
+	DateBorrowed time.Time `json:"dateBorrowed" binding:"required"`
 }
 
 func GetAllMovies(c *gin.Context) {
@@ -92,4 +97,71 @@ func CreateMovie(c *gin.Context) {
 		return
 	}
 	appG.Response(http.StatusCreated, movie)
+}
+
+func RentMovie(c *gin.Context) {
+	appG := app.Gin{C: c}
+	var input MovieRentRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		appG.Response(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var user models.User
+	var movie models.Movie
+
+	movieId, parsingError := helpers.ConvertStringToInt(&c.Params, "id")
+
+	if parsingError != nil {
+		log.Fatal(parsingError)
+		appG.Response(http.StatusBadRequest, "Error occurred")
+		return
+	}
+
+	userId, userTokenErr := jwt.GetUserIdFromToken(c)
+
+	if userTokenErr != nil {
+		log.Fatal(userTokenErr)
+		appG.Response(http.StatusBadRequest, "Error occurred")
+		return
+	}
+
+	if err := database.DB.First(&movie, "id = ? AND available = ?", movieId, true).Error; err != nil {
+		appG.Response(http.StatusBadRequest, "Opps... Movie not found/available!")
+		return
+	}
+
+	if err := database.DB.First(&user, userId).Error; err != nil {
+		appG.Response(http.StatusBadRequest, "User not found!")
+		return
+	}
+
+	if input.DateBorrowed.After(input.DueDate) {
+		appG.Response(http.StatusBadRequest, "Borrowed date is after Due date")
+		return
+	}
+
+	rentedMovie := models.Rent{
+		DueDate:      input.DueDate,
+		DateBorrowed: input.DateBorrowed,
+		UserID:       int(userId),
+		User:         user,
+		MovieId:      movieId,
+		Movie:        movie,
+		Returned:     false,
+	}
+
+	err := database.DB.Create(&rentedMovie).Error
+	if err != nil {
+		log.Fatal(err)
+		appG.Response(http.StatusBadRequest, "An Error occurred while creating a movie")
+		return
+	}
+	appG.Response(http.StatusCreated, rentedMovie)
+
+}
+
+
+func ReturnMovie(c *gin.Context){
+	
 }

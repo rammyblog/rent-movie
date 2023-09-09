@@ -89,6 +89,11 @@ func MigrateTables(db *gorm.DB) {
 		panic(err)
 	}
 
+	if err := db.AutoMigrate(&models.Rent{}); err != nil {
+		log.Fatal(err)
+		panic(err)
+	}
+
 }
 
 func seedMovies(db *gorm.DB) {

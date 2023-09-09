@@ -22,6 +22,7 @@ func InitRouter() *gin.Engine {
 		apiv1.GET("/movies", controllers.GetAllMovies)
 		apiv1.POST("/movies", controllers.CreateMovie)
 		apiv1.GET("/movies/:id", controllers.GetSingleMovie)
+		apiv1.POST("/movies/rent/:id", controllers.RentMovie)
 
 	}
 
