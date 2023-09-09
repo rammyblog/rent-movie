@@ -1,10 +1,13 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
-
 type Genre struct {
-	gorm.Model
-	Name string `gorm:"not null;uniqueIndex"`
+	Model
+	Name string `gorm:"not null;uniqueIndex;" json:"name"`
 }
+
+
+// monolight django app - handling admissions 2016() -refactor Change things
+//  requirements that changed over the year
+// rebuild
+// 3-4 months
+// 

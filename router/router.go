@@ -17,6 +17,9 @@ func InitRouter() *gin.Engine {
 	apiv1.Use(jwt.WithJWTAuth())
 	{
 		apiv1.GET("/user", controllers.GetUser)
+
+		// movies
+		apiv1.GET("/movies", controllers.GetAllMovies)
 	}
 
 	return r

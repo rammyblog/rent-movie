@@ -2,18 +2,16 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Movie struct {
-	gorm.Model
-	Name        string
-	Year        int
-	Rating      float64
-	ReleaseDate time.Time
-	Summary     string
-	Available   bool
-	Image       string
-	Genre       []Genre `gorm:"many2many:movie_genre;"`
+	Model
+	Name        string    `json:"name"`
+	Year        int       `json:"year"`
+	Rating      float64   `json:"rating"`
+	ReleaseDate time.Time `json:"releaseDate"`
+	Summary     string    `json:"summary"`
+	Available   bool      `json:"available"`
+	Image       string    `json:"image"`
+	Genre       []Genre   `gorm:"many2many:movie_genre;" json:"genre"`
 }

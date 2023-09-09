@@ -8,7 +8,6 @@ import (
 	"github.com/rammyblog/rent-movie/middleware/jwt"
 	"github.com/rammyblog/rent-movie/models"
 	"github.com/rammyblog/rent-movie/package/app"
-	"github.com/rammyblog/rent-movie/types"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -47,7 +46,7 @@ func Login(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, "Email or password incorrect")
 		return
 	}
-	
+
 	token, err := jwt.CreateJwt(&user)
 	if err != nil {
 		appG.Response(http.StatusBadRequest, "Internal server error")
@@ -65,6 +64,14 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
+	var existingUser models.User
+
+	database.DB.Where("email = ?", input.Email).First(&existingUser)
+	if existingUser.ID != 0 {
+		appG.Response(http.StatusBadRequest, "User already exist")
+		return
+	}
+
 	encpw, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
 		appG.Response(http.StatusBadRequest, err.Error())
@@ -77,5 +84,5 @@ func RegisterUser(c *gin.Context) {
 		appG.Response(http.StatusBadRequest, result.Error.Error())
 		return
 	}
-	appG.Response(http.StatusCreated, types.MapUserToUser(user))
+	appG.Response(http.StatusCreated, user)
 }
