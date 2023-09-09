@@ -14,7 +14,7 @@
 
 >**NOTE**</br>
 > * Before the fourth step, you should have created a database for this application
-> * The supported database is MySQL
+> * The supported database is Postgres
 
 * Clone this repo
 
@@ -25,7 +25,7 @@
 * Change directory to project directory
 
   ```bash
-  cd fragrance
+  cd rent-movie
   ```
 
 * Copy `.env` template
