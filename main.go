@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rammyblog/rent-movie/database"
 	"github.com/rammyblog/rent-movie/router"
+	"github.com/rammyblog/rent-movie/worker"
 )
 
 func main() {
@@ -33,6 +34,7 @@ func main() {
 		Handler: routersInit,
 	}
 
+	go worker.SendEmailReminder()
 	log.Printf("[info] start http server listening %s", port)
 
 	server.ListenAndServe() // listen and serve on 0.0.0.0:8080
