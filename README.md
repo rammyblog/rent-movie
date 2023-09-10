@@ -61,7 +61,7 @@ It was built with lot of struggles and love ❤️
   This will serve this application on the port you specified in the `.env` file.
 
 ## Usage
-The API is documented here 👇👇
+The API is documented here 👇👇</br>
 https://documenter.getpostman.com/view/15213147/2s9YC1WuHX
 ## Contributors
 
